@@ -18,9 +18,10 @@ queue_s* queue_create    (void);
  *  to NULL when complete.
  *
  *  INPUT:  Pointer to queue object data pointer to free and reset to NULL
- *  OUTPUT: None
+ *  OUTPUT: 0 on success
+ *.         -1 on NULL arguments
  */
-void    queue_destroy   (queue_s** Q_ptr);
+int     queue_destroy   (queue_s** Q_ptr);
 
 /**
  *  Enqueue a data object in the back of the queue.

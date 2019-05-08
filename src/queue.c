@@ -9,22 +9,23 @@
 //******************************************************************************
 //      STRUCTS
 //******************************************************************************
-typedef struct node {
+typedef struct node node_s;
+struct node {
     void* data;
-    node_t next;
-    node_t prev;
-} node_s;
+    node_s* next;
+    node_s* prev;
+};
 
 struct queue {
     int size;
-    node_t head;
-    node_t tail;
+    node_s* head;
+    node_s* tail;
 };
 
 //******************************************************************************
 //      PRIVATE FUNCTIONS
 //******************************************************************************
-static node_t node_create (void* new_data)
+static node_s* node_create (void* new_data)
 {
     node_s* N = malloc(sizeof(node_s));
     N->data = new_data;
@@ -36,7 +37,7 @@ static node_t node_create (void* new_data)
 //******************************************************************************
 //      PUBLIC FUNCTIONS
 //******************************************************************************
-queue_t queue_create()
+queue_s* queue_create()
 {
     queue_s* Q = malloc(sizeof(queue_s));
     Q->size = 0;
@@ -47,7 +48,7 @@ queue_t queue_create()
 
 int queue_destroy(queue_s** Q_ptr)
 {
-    if(!Q || !(*Q))
+    if(!Q_ptr || !(*Q_ptr))
         return -1;
 
     queue_s* Q = *Q_ptr;
@@ -60,6 +61,7 @@ int queue_destroy(queue_s** Q_ptr)
     }
     free(Q);
     *Q_ptr = NULL;
+    return 0;
 }
 
 int queue_enqueue(queue_s* Q, void* data)
