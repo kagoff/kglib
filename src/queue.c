@@ -1,16 +1,21 @@
 #include "queue.h"
 
+/**
+ * DESIGN:
+ * enqueue->tail->next->...->next->head->dequeue
+ *              <-prev<-...<-prev<-head
+ */
+
 //******************************************************************************
 //      STRUCTS
 //******************************************************************************
-typedef struct Node* node_t;
-struct Node {
+typedef struct node {
     void* data;
     node_t next;
     node_t prev;
-};
+} node_s;
 
-struct Queue {
+struct queue {
     int size;
     node_t head;
     node_t tail;
@@ -21,7 +26,7 @@ struct Queue {
 //******************************************************************************
 static node_t node_create (void* new_data)
 {
-    node_t N = (node_t)malloc(sizeof(struct Node));
+    node_s* N = malloc(sizeof(node_s));
     N->data = new_data;
     N->next = NULL;
     N->prev = NULL;
@@ -33,111 +38,82 @@ static node_t node_create (void* new_data)
 //******************************************************************************
 queue_t queue_create()
 {
-    queue_t Q = (queue_t)malloc(sizeof(struct Queue));
+    queue_s* Q = malloc(sizeof(queue_s));
     Q->size = 0;
     Q->head = NULL;
     Q->tail = NULL;
     return Q;
 }
 
-int queue_destroy(queue_t Q)
+int queue_destroy(queue_s** Q_ptr)
 {
-    if(!Q)
+    if(!Q || !(*Q))
         return -1;
 
-    while(Q->head) {
-        node_t next_node = Q->head->next;
-        free(Q->head);
-        Q->head = next_node;
+    queue_s* Q = *Q_ptr;
+
+    // Iterate and free all elements in the queue
+    while(Q->tail) {
+        node_s* next_node = Q->tail->next;
+        free(Q->tail);
+        Q->tail = next_node;
     }
-    return 0;
     free(Q);
+    *Q_ptr = NULL;
 }
 
-int queue_enqueue(queue_t Q, void* data)
+int queue_enqueue(queue_s* Q, void* data)
 {
     if(!Q || !data)
         return -1;
 
-    node_t N = node_create(data);
+    node_s* N = node_create(data);
 
+    // If an element is present, readjust the head's previous pointer
     if(!queue_count(Q))
-        Q->tail = N;
+        Q->head = N;
     else
-        Q->head->prev = N;
+        Q->tail->prev = N;
 
-    N->next = Q->head;
-    Q->head = N;
+    // Push onto the head of the list
+    N->next = Q->tail;
+    Q->tail = N;
 
     Q->size++;
     return 0;
 }
 
-int queue_dequeue(queue_t Q, void** return_data)
+int queue_dequeue(queue_s* Q, void** return_data)
 {
     if(!Q || !queue_count(Q))
         return -1;
 
+    // Dequeue at the tail
     if(return_data)
-        *return_data = Q->tail->data;
-    node_t new_tail = Q->tail->prev;
+        *return_data = Q->head->data;
 
+    // Move the tail to be the next element
+    node_s* new_head = Q->head->prev;
     if(queue_count(Q) > 1)
     {
-        new_tail->next = NULL;
-        free(Q->tail);
-        Q->tail = new_tail;
+        new_head->next = NULL;
+        free(Q->head);
+        Q->head = new_head;
     }
-    else
+    // This was the last element, reset the queue
+    else {
+        free(Q->head);
         Q->head = Q->tail = NULL;
+    }
 
     Q->size--;
     return 0;
 }
 
-int queue_count(queue_t Q)
+int queue_count(queue_s* Q)
 {
     if(!Q)
         return -1;
 
     return Q->size;
-}
-
-int queue_test()
-{
-    queue_t Q = queue_create();
-
-    int* front;
-    int a = 1;
-    assert(!queue_enqueue(Q, &a));
-    assert(!queue_dequeue(Q, (void*)&front));
-    assert(*front == a);
-    assert(queue_count(Q) == 0);
-
-    int b = 2;
-    int c = 3;
-    assert(!queue_enqueue(Q, &a));
-    assert(!queue_enqueue(Q, &b));
-    assert(!queue_enqueue(Q, &c));
-
-    assert(queue_count(Q) == 3);
-    assert(!queue_dequeue(Q, (void*)&front));
-    assert(*front == a);
-    assert(queue_count(Q) == 2);
-    assert(!queue_dequeue(Q, (void*)&front));
-    assert(*front == b);
-    assert(!queue_dequeue(Q, (void*)&front));
-    assert(*front == c);
-    assert(queue_count(Q) == 0);
-
-    assert(!queue_enqueue(Q, &c));
-    assert(!queue_dequeue(Q, NULL));
-    assert(queue_dequeue(Q, NULL));
-    assert(!queue_enqueue(Q, &c));
-    assert(queue_dequeue(NULL, (void*)&front));
-    assert(queue_dequeue(Q, (void*)&front));
-    assert(queue_count(Q) == 0);
-
-    assert(!queue_destroy(Q));
-    return 0;
 }
