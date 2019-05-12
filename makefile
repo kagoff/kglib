@@ -34,4 +34,4 @@ kglib_test: $(OBJ) $(TEST_OBJ)
 # Clean
 .PHONY: clean
 clean:
-	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~
+	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ $(TDIR)/*.o
