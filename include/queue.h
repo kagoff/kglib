@@ -3,7 +3,7 @@
 
 #include<stdlib.h>
 
-typedef struct queue queue_s;
+typedef struct Queue* kgqueue_t;
 
 /**
  *  Allocates a queue object and returns pointer to it.
@@ -11,7 +11,7 @@ typedef struct queue queue_s;
  *  INPUT:  None
  *  OUTPUT: Pointer to the allocated queue object data
  */
-queue_s* queue_create    (void);
+kgqueue_t queue_create    (void);
 
 /**
  *  Frees a queue object and sets the queue data to NULL when complete. This
@@ -22,7 +22,7 @@ queue_s* queue_create    (void);
  *  OUTPUT: 0 on success
  *.         -1 on NULL arguments
  */
-int     queue_destroy   (queue_s** Q_ptr);
+int     queue_destroy   (kgqueue_t* Q_ptr);
 
 /**
  *  Enqueue a data object in the back of the queue.
@@ -32,7 +32,17 @@ int     queue_destroy   (queue_s** Q_ptr);
  *  OUTPUT: 0 on success
  *          -1 on NULL arguments
  */
-int     queue_enqueue   (queue_s* Q, void* data);
+int     queue_enqueue   (kgqueue_t Q, void* data);
+
+/**
+ *  Peek at the front element from the queue, but do not dequeue it.
+ *
+ *  INPUT:  Queue object pointer
+ *          Address of data object pointer to return on
+ *  OUTPUT: 0 on success
+ *          -1 on NULL arguments
+ */
+int     queue_front   (kgqueue_t Q, void** return_data);
 
 /**
  *  Remove the front element from the queue. When return_data is NULL, still
@@ -43,7 +53,7 @@ int     queue_enqueue   (queue_s* Q, void* data);
  *  OUTPUT: 0 on success
  *          -1 on NULL queue
  */
-int     queue_dequeue   (queue_s* Q, void** return_data);
+int     queue_dequeue   (kgqueue_t Q, void** return_data);
 
 /**
  *  Get the number of elements currently in the queue.
@@ -52,6 +62,6 @@ int     queue_dequeue   (queue_s* Q, void** return_data);
  *  OUTPUT: Elements of queue on success
  *          -1 on NULL pointer
  */
-int     queue_count     (queue_s* Q);
+int     queue_count     (kgqueue_t Q);
 
 #endif

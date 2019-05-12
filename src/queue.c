@@ -9,25 +9,25 @@
 //******************************************************************************
 //      STRUCTS
 //******************************************************************************
-typedef struct node node_s;
-struct node {
+typedef struct Node* node_t;
+struct Node {
     void* data;
-    node_s* next;
-    node_s* prev;
+    node_t next;
+    node_t prev;
 };
 
-struct queue {
+struct Queue {
     int size;
-    node_s* head;
-    node_s* tail;
+    node_t head;
+    node_t tail;
 };
 
 //******************************************************************************
 //      PRIVATE FUNCTIONS
 //******************************************************************************
-static node_s* node_create (void* new_data)
+static node_t node_create (void* new_data)
 {
-    node_s* N = malloc(sizeof(node_s));
+    node_t N = malloc(sizeof(struct Node));
     N->data = new_data;
     N->next = NULL;
     N->prev = NULL;
@@ -37,25 +37,25 @@ static node_s* node_create (void* new_data)
 //******************************************************************************
 //      PUBLIC FUNCTIONS
 //******************************************************************************
-queue_s* queue_create()
+kgqueue_t queue_create()
 {
-    queue_s* Q = malloc(sizeof(queue_s));
+    kgqueue_t Q = malloc(sizeof(struct Queue));
     Q->size = 0;
     Q->head = NULL;
     Q->tail = NULL;
     return Q;
 }
 
-int queue_destroy(queue_s** Q_ptr)
+int queue_destroy(kgqueue_t* Q_ptr)
 {
     if(!Q_ptr || !(*Q_ptr))
         return -1;
 
-    queue_s* Q = *Q_ptr;
+    kgqueue_t Q = *Q_ptr;
 
     // Iterate and free all elements in the queue
     while(Q->tail) {
-        node_s* next_node = Q->tail->next;
+        node_t next_node = Q->tail->next;
         free(Q->tail);
         Q->tail = next_node;
     }
@@ -64,12 +64,12 @@ int queue_destroy(queue_s** Q_ptr)
     return 0;
 }
 
-int queue_enqueue(queue_s* Q, void* data)
+int queue_enqueue(kgqueue_t Q, void* data)
 {
     if(!Q || !data)
         return -1;
 
-    node_s* N = node_create(data);
+    node_t N = node_create(data);
 
     // If an element is present, readjust the head's previous pointer
     if(!queue_count(Q))
@@ -85,17 +85,26 @@ int queue_enqueue(queue_s* Q, void* data)
     return 0;
 }
 
-int queue_dequeue(queue_s* Q, void** return_data)
+int queue_front(kgqueue_t Q, void** return_data)
+{
+    if(!Q || !(return_data) || !queue_count(Q))
+        return -1;
+
+    *return_data = Q->head->data;
+    return 0;
+}
+
+int queue_dequeue(kgqueue_t Q, void** return_data)
 {
     if(!Q || !queue_count(Q))
         return -1;
 
-    // Dequeue at the tail
+    // Dequeue at the head
     if(return_data)
         *return_data = Q->head->data;
 
-    // Move the tail to be the next element
-    node_s* new_head = Q->head->prev;
+    // Move the head to be the next in line element
+    node_t new_head = Q->head->prev;
     if(queue_count(Q) > 1)
     {
         new_head->next = NULL;
@@ -112,7 +121,7 @@ int queue_dequeue(queue_s* Q, void** return_data)
     return 0;
 }
 
-int queue_count(queue_s* Q)
+int queue_count(kgqueue_t Q)
 {
     if(!Q)
         return -1;

@@ -3,7 +3,7 @@
 
 #include<stdlib.h>
 
-typedef struct stack* kgstack_t;
+typedef struct Stack* kgstack_t;
 
 /**
  *  Allocates a stack object and returns pointer to it.

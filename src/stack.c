@@ -9,7 +9,7 @@ struct Node {
     node_t next;
 };
 
-struct stack {
+struct Stack {
     int size;
     node_t root;
 };
@@ -28,7 +28,7 @@ static node_t node_create (void* new_data) {
 //      PUBLIC FUNCTIONS
 //******************************************************************************
 kgstack_t stack_create() {
-    kgstack_t return_stack = (kgstack_t)malloc(sizeof(struct stack));
+    kgstack_t return_stack = (kgstack_t)malloc(sizeof(struct Stack));
     return_stack->size = 0;
     return_stack->root = NULL;
     return return_stack;

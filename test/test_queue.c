@@ -4,7 +4,7 @@
 
 void test_queue()
 {
-    queue_s* Q = queue_create();
+    kgqueue_t Q = queue_create();
 
     /***************************************************************************
      * Simple test
