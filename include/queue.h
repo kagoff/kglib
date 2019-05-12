@@ -14,8 +14,9 @@ typedef struct queue queue_s;
 queue_s* queue_create    (void);
 
 /**
- *  Allocates a queue object and returns pointer to it. Sets the queue data
- *  to NULL when complete.
+ *  Frees a queue object and sets the queue data to NULL when complete. This
+ *  does not free the actual data stored in the queue, so be careful not to
+ *  lose memory here.
  *
  *  INPUT:  Pointer to queue object data pointer to free and reset to NULL
  *  OUTPUT: 0 on success
@@ -40,7 +41,7 @@ int     queue_enqueue   (queue_s* Q, void* data);
  *  INPUT:  Queue object pointer
  *          Address of data object pointer to return on
  *  OUTPUT: 0 on success
- *          -1 on NULL arguments
+ *          -1 on NULL queue
  */
 int     queue_dequeue   (queue_s* Q, void** return_data);
 

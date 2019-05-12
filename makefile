@@ -12,11 +12,11 @@ CFLAGS=-I$(IDIR) $(LIBS) -g
 #LIBS +=-lm -pthread -ldl
 
 # Dependencies and Objects lists
-_DEPS = queue.h #bst.h hash.h heap.h stack.h
+_DEPS = queue.h stack.h#bst.h hash.h heap.h 
 DEPS  = $(patsubst %,$(IDIR)/%,$(_DEPS))
-_OBJ = queue.o #bst.o hash.o heap.o stack.o
+_OBJ = queue.o stack.o#bst.o hash.o heap.o
 OBJ  = $(patsubst %,$(ODIR)/%,$(_OBJ))
-_TEST_OBJ = test_all.o test_hash.o test_queue.o
+_TEST_OBJ = test_all.o test_stack.o test_queue.o
 TEST_OBJ  = $(patsubst %,$(TDIR)/%,$(_TEST_OBJ))
 
 # Compile all C objects

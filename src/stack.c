@@ -9,7 +9,7 @@ struct Node {
     node_t next;
 };
 
-struct Stack {
+struct stack {
     int size;
     node_t root;
 };
@@ -27,28 +27,30 @@ static node_t node_create (void* new_data) {
 //******************************************************************************
 //      PUBLIC FUNCTIONS
 //******************************************************************************
-stack_t stack_create() {
-    stack_t return_stack = (stack_t)malloc(sizeof(struct Stack));
+kgstack_t stack_create() {
+    kgstack_t return_stack = (kgstack_t)malloc(sizeof(struct stack));
     return_stack->size = 0;
     return_stack->root = NULL;
     return return_stack;
 }
 
-int stack_destroy(stack_t S) {
+int stack_destroy(kgstack_t* S_ptr) {
 
-    if(!S)
+    if(!S_ptr || !(*S_ptr))
         return -1;
 
+    kgstack_t S = *S_ptr;
     while(S->root) {
         node_t next_node = S->root->next;
         free(S->root);
         S->root = next_node;
     }
     free(S);
+    *S_ptr = NULL;
     return 0;
 }
 
-int stack_push(stack_t S, void* data)
+int stack_push(kgstack_t S, void* data)
 {
     if(!S || !data)
         return -1;
@@ -61,7 +63,16 @@ int stack_push(stack_t S, void* data)
     return 0;
 }
 
-int stack_pop(stack_t S, void** return_data)
+int stack_top(kgstack_t S, void** return_data)
+{
+    if(!S || !return_data)
+        return -1;
+
+    *return_data = S->root->data;
+    return 0;
+}
+
+int stack_pop(kgstack_t S, void** return_data)
 {
     if(!S)
         return -1;
@@ -77,18 +88,10 @@ int stack_pop(stack_t S, void** return_data)
     return 0;
 }
 
-int stack_count(stack_t S)
+int stack_count(kgstack_t S)
 {
     if(!S)
         return -1;
 
     return S->size;
-}
-
-int stack_is_empty (stack_t S)
-{
-    if(!S)
-        return -1;
-
-    return (S->size == 0) ? 1 : 0;
 }
