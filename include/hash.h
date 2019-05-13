@@ -1,7 +1,7 @@
 #ifndef HASH_H
 #define HASH_H
 
-#include<stdlib.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 typedef struct Hash* kghash_t;
@@ -36,6 +36,15 @@ int         hash_remove     (kghash_t H, int key, void** value);
  *          0 otherwise
  */
 int         hash_find       (kghash_t H, int key, void** value);
+
+/**
+ *  Get the number of elements currently in the hash table.
+ *
+ *  INPUT:  Hash object pointer
+ *  OUTPUT: Elements of hash table on success
+ *          -1 on NULL pointer
+ */
+size_t      hash_count      (kghash_t H);
 
 /**
  *  Prints the hash table top to bottom, showing the items sharing a key as a

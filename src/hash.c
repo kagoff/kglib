@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include"hash.h"
 
 #define MAX_TABLE_SIZE (1 << 10)
@@ -24,10 +26,11 @@ struct Hash {
 //******************************************************************************
 //      PRIVATE FUNCTIONS
 //******************************************************************************
-static inline uint64_t hash_key (int key)
+static inline uint64_t
+hash_key (int key)
 {
     uint64_t hash = FNV_OFFSET;
-    uint8_t* key_byte;
+    uint8_t* key_byte = (uint8_t*)&key;
 
     // FNV-1a hash algorithm
     for (uint64_t byte = 0; byte < sizeof(int); byte++) {
@@ -38,7 +41,8 @@ static inline uint64_t hash_key (int key)
     return hash;
 }
 
-static hash_entry_t entry_create (void* data, int key)
+static hash_entry_t
+entry_create (void* data, int key)
 {
     if(!data) {
         return NULL;
@@ -51,7 +55,8 @@ static hash_entry_t entry_create (void* data, int key)
     return entry;
 }
 
-static inline hash_entry_t find_entry (kghash_t H, int key, hash_entry_t* prev)
+static inline hash_entry_t
+find_entry (kghash_t H, int key, hash_entry_t* prev)
 {
     if(!H) {
         return NULL;
@@ -66,7 +71,7 @@ static inline hash_entry_t find_entry (kghash_t H, int key, hash_entry_t* prev)
         return NULL;
 
     // Walk the linked list to find matching entry
-    hash_entry_t prev_slot;
+    hash_entry_t prev_slot = NULL;
     while(entry_slot && (entry_slot->key != key)) {
         prev_slot = entry_slot;
         entry_slot = entry_slot->next;
@@ -78,7 +83,7 @@ static inline hash_entry_t find_entry (kghash_t H, int key, hash_entry_t* prev)
     }
 
     // For a remove, need to know the previous slot
-    if(prev) {
+    if(prev_slot) {
         *prev = prev_slot;
     }
 
@@ -88,7 +93,8 @@ static inline hash_entry_t find_entry (kghash_t H, int key, hash_entry_t* prev)
 //******************************************************************************
 //      PUBLIC FUNCTIONS
 //******************************************************************************
-kghash_t hash_create (size_t table_size)
+kghash_t
+hash_create (size_t table_size)
 {
     if(table_size > MAX_TABLE_SIZE) {
         return NULL;
@@ -96,13 +102,15 @@ kghash_t hash_create (size_t table_size)
 
     kghash_t H = malloc(sizeof(struct Hash));
     H->table = malloc(table_size * sizeof(hash_entry_t));
+    memset(H->table, 0, table_size * sizeof(hash_entry_t));
     H->table_size = table_size;
     H->count = 0;
 
     return H;
 }
 
-int hash_destroy (kghash_t* H_ptr)
+int
+hash_destroy (kghash_t* H_ptr)
 {
     if(!H_ptr || !(*H_ptr)) {
         return -1;
@@ -114,10 +122,12 @@ int hash_destroy (kghash_t* H_ptr)
             ;// TODO:Walk list and free each element
         }
     }
+    *H_ptr = NULL;
     return 0;
 }
 
-int hash_insert (kghash_t H, void* data, int key)
+int
+hash_insert (kghash_t H, void* data, int key)
 {
     if(!H || !data) {
         return -1;
@@ -146,10 +156,12 @@ int hash_insert (kghash_t H, void* data, int key)
         prev_slot->next = entry_slot;
     }
 
+    H->count++;
     return 0;
 }
 
-int hash_remove (kghash_t H, int key, void** data_ptr)
+int
+hash_remove (kghash_t H, int key, void** data_ptr)
 {
     if(!H || !data_ptr) {
         return -1;
@@ -158,19 +170,26 @@ int hash_remove (kghash_t H, int key, void** data_ptr)
     // Find the entry
     hash_entry_t prev = NULL;
     hash_entry_t entry = find_entry(H, key, &prev);
-    if(!entry || !prev) {
+    if(!entry) {
         return -1;
+    }
+
+    // If there were multiple elements in the slot, move next pointer
+    if(prev) {
+        prev->next = entry->next;
     }
 
     // Set return data and free the entry
     *data_ptr = entry->data;
     free(entry);
-    prev->next = NULL;
 
+
+    H->count--;
     return 0;
 }
 
-int hash_find (kghash_t H, int key, void** data_ptr)
+int
+hash_find (kghash_t H, int key, void** data_ptr)
 {
     if(!H || !data_ptr) {
         return -1;
@@ -185,6 +204,16 @@ int hash_find (kghash_t H, int key, void** data_ptr)
     // Set the data
     *data_ptr = entry->data;
     return 0;
+}
+
+size_t
+hash_count (kghash_t H)
+{
+    if(!H) {
+        return -1;
+    }
+
+    return H->count;
 }
 
 // void hash_print_keys(kghash_t H)

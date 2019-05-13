@@ -16,7 +16,7 @@ _DEPS = queue.h stack.h hash.h #bst.h heap.h
 DEPS  = $(patsubst %,$(IDIR)/%,$(_DEPS))
 _OBJ = queue.o stack.o hash.o #bst.o  heap.o
 OBJ  = $(patsubst %,$(ODIR)/%,$(_OBJ))
-_TEST_OBJ = test_all.o test_stack.o test_queue.o
+_TEST_OBJ = test_all.o test_stack.o test_queue.o test_hash.o
 TEST_OBJ  = $(patsubst %,$(TDIR)/%,$(_TEST_OBJ))
 
 # Compile all C objects
