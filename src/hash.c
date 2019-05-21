@@ -83,7 +83,7 @@ find_entry (kghash_t H, int key, hash_entry_t* prev)
     }
 
     // For a remove, need to know the previous slot
-    if(prev_slot) {
+    if(prev_slot && prev) {
         *prev = prev_slot;
     }
 
@@ -96,7 +96,7 @@ find_entry (kghash_t H, int key, hash_entry_t* prev)
 kghash_t
 hash_create (size_t table_size)
 {
-    if(table_size > MAX_TABLE_SIZE) {
+    if(table_size <= 0 || table_size > MAX_TABLE_SIZE) {
         return NULL;
     }
 
@@ -117,9 +117,16 @@ hash_destroy (kghash_t* H_ptr)
     }
 
     kghash_t H = *H_ptr;
-    for(uint64_t index = 0; index < MAX_TABLE_SIZE; index++) {
+    size_t table_size = H->table_size;
+    for(size_t index = 0; index < table_size; index++) {
         if(H->table[index]) {
-            ;// TODO:Walk list and free each element
+            hash_entry_t entry = H->table[index];
+            hash_entry_t next = NULL;
+            while(entry) {
+                next = entry->next;
+                free(entry); //TODO: fix this
+                entry = next;
+            }
         }
     }
     *H_ptr = NULL;
@@ -177,12 +184,13 @@ hash_remove (kghash_t H, int key, void** data_ptr)
     // If there were multiple elements in the slot, move next pointer
     if(prev) {
         prev->next = entry->next;
+    } else {
+        H->table[ (hash_key(key) % H->table_size) ] = NULL;
     }
 
     // Set return data and free the entry
     *data_ptr = entry->data;
     free(entry);
-
 
     H->count--;
     return 0;
@@ -216,7 +224,8 @@ hash_count (kghash_t H)
     return H->count;
 }
 
-// void hash_print_keys(kghash_t H)
+// void
+// hash_for_each (kghash_t H, kghash_func_t func, void* arg1, void* arg2)
 // {
 //     kghash_t* entry;
 //     int newline;
