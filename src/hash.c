@@ -119,12 +119,14 @@ hash_destroy (kghash_t* H_ptr)
     kghash_t H = *H_ptr;
     size_t table_size = H->table_size;
     for(size_t index = 0; index < table_size; index++) {
+        // Process all populated indices
         if(H->table[index]) {
             hash_entry_t entry = H->table[index];
             hash_entry_t next = NULL;
+            // Walk the linked list to free each item in index
             while(entry) {
                 next = entry->next;
-                free(entry); //TODO: fix this
+                free(entry);
                 entry = next;
             }
         }
@@ -224,30 +226,39 @@ hash_count (kghash_t H)
     return H->count;
 }
 
-// void
-// hash_for_each (kghash_t H, kghash_func_t func, void* arg1, void* arg2)
-// {
-//     kghash_t* entry;
-//     int newline;
-//     int i;
-//     for(i = 0; i < SIZE_TABLE; i++)
-//     {
-//         newline = 0;
-//         entry = h + i;
-//         if(entry->inArray)
-//         {
-//             newline = 1;
-//             printf("%d", entry->key);
-//         }
+int
+hash_for_each (kghash_t H, kghash_func_t func, void* arg1, void* arg2,
+               void** failed_entry)
+{
+    if(!H || !func || !failed_entry) {
+        return -1;
+    }
 
-//         while(entry->next)
-//         {
-//             newline = 1;
-//             entry = entry->next;
-//             printf(" ,%d", entry->key);
-//         }
+    // Set failed entry to NULL to avoid false positives
+    if(failed_entry) {
+        *failed_entry = NULL;
+    }
 
-//         if(newline)
-//             printf("\n");
-//     }
-// }
+    size_t table_size = H->table_size;
+    for(size_t index = 0; index < table_size; index++) {
+        // Skip empty indices
+        if(H->table[index]) {
+            hash_entry_t entry = H->table[index];
+            hash_entry_t next = NULL;
+            // On each entry found in the index , run the function
+            while(entry) {
+                int rc = func(entry->data, entry->key, arg1, arg2);
+                // On failure, carry the error out and indicate failed entry
+                if(rc != 0) {
+                    if(failed_entry) {
+                        *failed_entry = entry->data;
+                    }
+                    return rc;
+                }
+                entry = entry->next;
+            }
+        }
+    }
+
+    return 0;
+}

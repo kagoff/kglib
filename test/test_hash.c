@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "hash.h"
 
@@ -7,6 +8,37 @@
 #define TEST_TABLE_SIZE_SMALL 10
 #define TEST_DEFAULT_KEY 0xFFFF
 #define TEST_DATA_SIZE 512
+#define TEST_HASH_FOR_EACH_FIND_ELEMENT "data5"
+#define TEST_HASH_FOR_EACH_FIND_INDEX 5
+
+/**
+ * Helpers to check the hash_for_each API function
+ */
+static int
+hash_for_each_find (void* data, int key, void* arg1, void* arg2) {
+    if(!data) {
+        return -2;
+    }
+    int result = strncmp((char*)data,
+                    TEST_HASH_FOR_EACH_FIND_ELEMENT,
+                    sizeof(TEST_HASH_FOR_EACH_FIND_ELEMENT));
+    if(result == 0) {
+        return -1;
+    }
+    return 0;
+}
+static int
+hash_for_each_args (void* data, int key, void* arg1, void* arg2) {
+    if(!data || !arg1 || !arg2) {
+        return -1;
+    }
+    return 0;
+}
+static int
+hash_for_each_print_key (void* data, int key, void* arg1, void* arg2) {
+    printf("%d\n", key);
+    return 0;
+}
 
 void
 test_hash(void)
@@ -74,6 +106,18 @@ test_hash(void)
         assert(found == data[index]);
     }
     assert(hash_count(H) == TEST_DATA_ARRAY_SIZE);
+
+    /***************************************************************************
+     * hash_for_each tests
+     **************************************************************************/
+    assert(hash_for_each(H, hash_for_each_find, NULL, NULL, (void**)&found));
+    assert(found == data[TEST_HASH_FOR_EACH_FIND_INDEX]);
+    int arg1, arg2;
+    assert(!hash_for_each(H, hash_for_each_args, &arg1, &arg2, (void**)&found));
+    assert(!found);
+    // TODO: make a print test that self checks and doesn't really print
+    // assert(!hash_for_each(H, hash_for_each_print_key, NULL, NULL,
+    //        (void**)&found));
 
     /***************************************************************************
      * hash_remove tests
